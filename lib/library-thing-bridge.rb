@@ -9,7 +9,7 @@ class Worker
   def run
     loop do
       return if @shutting_down
-      @message_pump.handle_message
+      @message_pump.handle_request
     end
   end
 
@@ -24,20 +24,35 @@ class MessagePump
     @message_handler = message_handler
   end
 
-  def handle_message
+  def handle_request
     DaemonKit.logger.info "waiting for message..."
-    message = @serial.read_message
-    DaemonKit.logger.info "read message"
-    @message_handler.handle_message(message)
+    req = @serial.read_request
+    DaemonKit.logger.info "handle request"
+    rsp = @message_handler.handle_request(req)
+    DaemonKit.logger.info "handle response"
+    @serial.write_response(rsp)
   end
 end
 
 class Serial
-  def read_message
+  def read_request
+  end
+
+  def write_response
   end
 end
 
 class MessageHandler
-  def handle_message
+  def handle_request(request)
+    case request.type
+    when :tag_req
+      puts "tag request"
+    when :borrow_req
+      puts "borrow item request"
+    when :return_req
+      puts "return request"
+    else
+      DaemonKit.logger.info "Unknown retuest type: #{request.type}"
+    end
   end
 end
