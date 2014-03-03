@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+#
+# Stub executable for library-thing-bridge
+#
+
+require File.expand_path('../../config/environment',  __FILE__)
+
+DaemonKit::Application.exec( DAEMON_ROOT + '/libexec/library-thing-bridge-daemon.rb' )
