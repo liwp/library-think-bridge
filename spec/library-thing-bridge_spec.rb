@@ -8,33 +8,33 @@ describe MessageHandler do
   end
 
   it "delegates tag requests to id service" do
-    req = Request.new(:tag_req)
+    req = { :type => "tag_req", :tag => :tag_value }
 
     expect(@tag_service).
-      to receive(:lookup_tag).
-      with(req).
+      to receive(:lookup).
+      with(:tag_value).
       and_return(:lookup_rsp)
 
     expect(@mh.handle_request(req)).to be(:lookup_rsp)
   end
 
   it "delegates borrow requests to library service" do
-    req = Request.new(:borrow_req)
+    req = { :type => "borrow_req", :book => :book_isbn }
 
     expect(@library_service).
       to receive(:borrow).
-      with(req).
+      with(:book_isbn).
       and_return(:borrow_rsp)
 
     expect(@mh.handle_request(req)).to be(:borrow_rsp)
   end
 
   it "delegates return requests to library service" do
-    req = Request.new(:return_req)
+    req = { :type => "return_req", :book => :book_isbn }
 
     expect(@library_service).
       to receive(:return).
-      with(req).
+      with(:book_isbn).
       and_return(:return_rsp)
 
     expect(@mh.handle_request(req)).to be(:return_rsp)

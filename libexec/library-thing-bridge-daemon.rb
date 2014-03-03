@@ -12,8 +12,11 @@ DaemonKit::Application.running! do |config|
   config.trap( 'INT', Proc.new { puts 'Going down' } )
 end
 
-# Sample loop to show process
-loop do
-  DaemonKit.logger.info "I'm running"
-  sleep 60
-end
+sp = FileBasedSerial.new(File.join(File.dirname(__FILE__), '..', 'requests.json'))
+ids = FileBasedIdService.new(File.join(File.dirname(__FILE__), '..', 'id_db.json'))
+lms = PrintingLibraryManagementService.new(File.join(File.dirname(__FILE__), '..', 'books.json'))
+mh = MessageHandler.new(ids, lms)
+mp = MessagePump.new(sp, mh)
+worker = Worker.new(mp)
+
+worker.run

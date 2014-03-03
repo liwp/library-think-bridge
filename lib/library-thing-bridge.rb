@@ -7,9 +7,11 @@ class Worker
   end
 
   def run
-    loop do
-      return if @shutting_down
-      @message_pump.handle_request
+    catch :done do
+      loop do
+        return if @shutting_down
+        @message_pump.handle_request
+      end
     end
   end
 
@@ -34,14 +36,6 @@ class MessagePump
   end
 end
 
-class Serial
-  def read_request
-  end
-
-  def write_response
-  end
-end
-
 class MessageHandler
   def initialize(id_service, library_management_service)
     @id_service = id_service
@@ -49,17 +43,63 @@ class MessageHandler
   end
 
   def handle_request(request)
-    case request.type
-    when :tag_req
-      @id_service.lookup_tag(request)
-    when :borrow_req
-      @library_management_service.borrow(request)
-    when :return_req
-      @library_management_service.return(request)
+    case request[:type]
+    when "tag_req"
+      @id_service.lookup(request[:tag])
+    when "borrow_req"
+      @library_management_service.borrow(request[:book])
+    when "return_req"
+      @library_management_service.return(request[:book])
     else
-      DaemonKit.logger.info "Unknown retuest type: #{request.type}"
+      DaemonKit.logger.info "Unknown request type: #{request[:type]}"
+      raise "Unknown request type: #{request[:type]}"
     end
   end
 end
 
-Request = Struct.new(:type)
+class PrintingLibraryManagementService
+  def initialize(file_name)
+    entries = JSON.parse(IO.read(file_name), :symbolize_names => true)
+    @books = entries.each_with_object({}) { |v,h| h[v[:isbn]] = v }
+    DaemonKit.logger.info("PrintingLibraryManagementService - DB: #{@books}")
+  end
+
+  def borrow(book_isbn)
+    book = @books[book_isbn]
+    puts "borrow book: #{book}"
+    book
+  end
+
+  def return(book_isbn)
+    puts "return book: #{book_isbn}"
+  end
+end
+
+class FileBasedIdService
+  def initialize(file_name)
+    entries = JSON.parse(IO.read(file_name), :symbolize_names => true)
+    @db = entries.each_with_object({}) { |v,h| h[v[:tag]] = v }
+  end
+
+  def lookup(tag)
+    DaemonKit.logger.info("FileBasedIdService - lookup: #{tag.inspect}")
+    id = @db[tag]
+    DaemonKit.logger.info("FileBasedIdService - found id: #{id}")
+    id
+  end
+end
+
+class FileBasedSerial
+  def initialize(file_name)
+    @requests = JSON.parse(IO.read(file_name), :symbolize_names => true)
+  end
+
+  def read_request
+    throw :done if @requests.empty?
+    @requests.shift
+  end
+
+  def write_response(rsp)
+    DaemonKit.logger.info("FileBasedSerial: #{rsp}")
+  end
+end

@@ -1,0 +1,10 @@
+[
+    {"type": "tag_req", "tag": "1"},
+    {"type": "tag_req", "tag": "2"},
+    {"type": "borrow_req", "book": "1"},
+    {"type": "return_req", "book": "1"},
+    {"type": "borrow_req", "book": "2"},
+    {"type": "borrow_req", "book": "1"},
+    {"type": "return_req", "book": "1"},
+    {"type": "return_req", "book": "2"}
+]

@@ -15,6 +15,9 @@ gem 'daemon-kit'
 gem 'safely'
 # gem 'toadhopper' # For reporting exceptions to hoptoad
 # gem 'mail' # For reporting exceptions via mail
+
+gem 'json'
+
 group :development, :test do
   gem 'rake'
   gem 'rspec' 
