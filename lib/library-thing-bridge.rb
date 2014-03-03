@@ -43,16 +43,23 @@ class Serial
 end
 
 class MessageHandler
+  def initialize(id_service, library_management_service)
+    @id_service = id_service
+    @library_management_service = library_management_service
+  end
+
   def handle_request(request)
     case request.type
     when :tag_req
-      puts "tag request"
+      @id_service.lookup_tag(request)
     when :borrow_req
-      puts "borrow item request"
+      @library_management_service.borrow(request)
     when :return_req
-      puts "return request"
+      @library_management_service.return(request)
     else
       DaemonKit.logger.info "Unknown retuest type: #{request.type}"
     end
   end
 end
+
+Request = Struct.new(:type)
