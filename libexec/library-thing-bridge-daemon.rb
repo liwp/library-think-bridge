@@ -9,6 +9,7 @@ DaemonKit::Application.running! do |config|
   #   # do something clever
   # end
   # config.trap( 'TERM', Proc.new { puts 'Going down' } )
+  config.trap( 'INT', Proc.new { puts 'Going down' } )
 end
 
 # Sample loop to show process
